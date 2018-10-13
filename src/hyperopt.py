@@ -6,19 +6,24 @@ import sklearn.tree
 import numpy as np
 import sys
 import json
+import datetime
 
 def gridsearch(estimator, parameters, train_x, train_y):
+    time=datetime.datetime.now()
     clf = sklearn.model_selection.GridSearchCV(estimator, parameters, n_jobs=-1)
     clf.fit(train_x, train_y)
+    elapsed = (datetime.datetime.now() - time).seconds
     # return clf.cv_results_
-    return clf.best_params_, clf.best_score_
+    return clf.best_params_, clf.best_score_, elapsed
 
 # return times also
 def randomsearch(estimator, parameters, train_x, train_y):
+    time=datetime.datetime.now()
     clf = sklearn.model_selection.RandomizedSearchCV(estimator, parameters, n_jobs=-1)
     clf.fit(train_x, train_y)
+    elapsed = (datetime.datetime.now() - time).seconds
     # return clf.cv_results_
-    return clf.best_params_, clf.best_score_
+    return clf.best_params_, clf.best_score_, elapsed
 
 # def plotsamplesaccuracy():
 #     pass
@@ -65,20 +70,22 @@ class Model:
         parameters = parameters[modelclass]
         parameters = numerify(parameters)
 
-        best_params_grid, best_score_grid = gridsearch(estimator, parameters, train_x, train_y)
-        best_params_random, best_score_random = randomsearch(estimator, parameters, train_x, train_y)
-        return best_params_grid, best_score_grid, best_params_random, best_score_random
+        best_params_grid, best_score_grid, elapsed_grid = gridsearch(estimator, parameters, train_x, train_y)
+        best_params_random, best_score_random, elapsed_random = randomsearch(estimator, parameters, train_x, train_y)
+        return best_params_grid, best_score_grid, elapsed_grid, best_params_random, best_score_random, elapsed_random
         # return bestparams_random
 
-def jsonify(best_params_grid, best_score_grid, best_params_random, best_score_random):
+def jsonify(best_params_grid, best_score_grid, elapsed_grid, best_params_random, best_score_random, elapsed_random):
     jsonified = {
         "grid":{
             "parameters": best_params_grid,
-            "score": best_score_grid
+            "score": best_score_grid,
+            "elapsed": elapsed_grid
         },
         "random":{
             "parameters": best_params_random,
-            "score": best_score_random
+            "score": best_score_random,
+            "elapsed": elapsed_random
         }
     }
     return jsonified
@@ -103,8 +110,8 @@ def main():
     with open(hyperparametersfile) as f:
         hyperparameters = json.load(f)
 
-    best_params_grid, best_score_grid, best_params_random, best_score_random = model.run(train_x, train_y, modelclass, hyperparameters)
-    print(json.dumps(jsonify(best_params_grid, best_score_grid, best_params_random, best_score_random)))
+    best_params_grid, best_score_grid, elapsed_grid, best_params_random, best_score_random, elapsed_random = model.run(train_x, train_y, modelclass, hyperparameters)
+    print(json.dumps(jsonify(best_params_grid, best_score_grid, elapsed_grid, best_params_random, best_score_random, elapsed_random)))
     sys.stdout.flush()
 
 
