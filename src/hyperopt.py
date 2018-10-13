@@ -2,6 +2,7 @@ from sklearn.externals.joblib import Parallel, delayed
 import itertools
 import sklearn.model_selection
 import sklearn.linear_model
+import sklearn.neural_network
 import sklearn.tree
 import numpy as np
 import sys
@@ -53,6 +54,7 @@ class Model:
         self.modelestimators = {
             'logisticregression': sklearn.linear_model.LogisticRegression(),
             'decisiontreeclassifier': sklearn.tree.DecisionTreeClassifier(),
+            'neuralnetworkclassifier': sklearn.neural_network.MLPClassifier()
         }
     def getdefaultparameters(self):
         with open('src/defaulthyperparameters.json') as f:
@@ -94,13 +96,13 @@ def numerify(parameters):
     for key in parameters:
         try:
             parameters[key] = [float(val) for val in parameters[key]]
-        except ValueError:
+        except:
             pass
     return parameters
 
 
 def main():
-    data = np.stack([np.append(30*(i%2+1)+15*np.random.randn(50),(i%2+1)) for i in range(1,10000)])
+    data = np.stack([np.append(30*(i%2+1)+15*np.random.randn(50),(i%2+1)) for i in range(1,1000)])
     train_x = data[:,0:-1]
     train_y = data[:,-1]
     model = Model()
@@ -110,6 +112,8 @@ def main():
     with open(hyperparametersfile) as f:
         hyperparameters = json.load(f)
 
+    # best_params_grid, best_score_grid, elapsed_grid, best_params_random, best_score_random, elapsed_random = model.run(train_x, train_y, modelclass, hyperparameters)
+    # print(json.dumps(jsonify(best_params_grid, best_score_grid, elapsed_grid, best_params_random, best_score_random, elapsed_random)))
     try:
         best_params_grid, best_score_grid, elapsed_grid, best_params_random, best_score_random, elapsed_random = model.run(train_x, train_y, modelclass, hyperparameters)
         print(json.dumps(jsonify(best_params_grid, best_score_grid, elapsed_grid, best_params_random, best_score_random, elapsed_random)))
