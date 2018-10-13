@@ -1,0 +1,65 @@
+<oj-label for="modelSelect">Pick a model</oj-label>
+<oj-select-one id="modelSelect" value="{{modelSelected}}" style="max-width:20em" on-value-changed="[[loadHyperparams]]">
+    <!-- ko  foreach: dummyModels-->
+    <oj-option value="[[value]]"><span data-bind="text: model"></span></oj-option>
+    <!-- /ko -->
+</oj-select-one>
+<!-- <span>The model you selected is: </span><span data-bind="text: modelSelected"></span> -->
+
+
+
+<oj-form-layout >
+    <!-- ko foreach: {data: Object.keys(hyperParamsSelected()), as: '_propkey'} -->
+        <!-- <oj-input-text  required label-hint="{{_propkey}}" data-bind="{value: $parent.hyperParamsSelected()[_propkey]}"></oj-input-text> -->
+        <oj-input-text  required label-hint="{{_propkey}}" value="{{$parent.hyperParamsSelected()[_propkey]}}"></oj-input-text>
+    <!-- /ko -->
+</oj-form-layout>
+
+<h2>Grid</h2>
+<oj-form-layout>
+    <!-- ko with:optimalParams().grid -->
+        <div>
+            <span >Time to run a Grid Search: </span><span data-bind="text: elapsed"></span>
+        </div>
+        <div>
+            <span >Best Score via Grid Search: </span><span data-bind="text: score"></span>
+        </div>
+    <!-- /ko -->
+
+    <!-- ko if: optimalParams().grid -->
+        <!-- ko foreach: {data: Object.keys(optimalParams().grid.parameters), as: '_propkey'} -->
+            <div>
+                <span data-bind="text: _propkey"> </span>
+                <span>: </span>
+                <span data-bind="text: $parent.optimalParams().grid.parameters[_propkey] "></span>
+            </div>
+        <!-- /ko -->
+    <!-- /ko -->
+
+</oj-form-layout>
+
+<h2>Random</h2>
+<oj-form-layout>
+    <!-- ko with:optimalParams().random -->
+        <div>
+            <span >Time to run a Random Search: </span><span data-bind="text: elapsed"></span>
+        </div>
+        <div>
+            <span >Best Score via Random Search: </span><span data-bind="text: score"></span>
+        </div>
+    <!-- /ko -->
+
+    <!-- ko if: optimalParams().random -->
+        <!-- ko foreach: {data: Object.keys(optimalParams().random.parameters), as: '_propkey'} -->
+            <div>
+                <span data-bind="text: _propkey"> </span>
+                <span>: </span>
+                <span data-bind="text: $parent.optimalParams().random.parameters[_propkey] "></span>
+            </div>
+        <!-- /ko -->
+    <!-- /ko -->
+
+</oj-form-layout>
+
+<oj-button id='button1' on-oj-action='[[hyperParamSubmit]]'>Run</oj-button>
+
