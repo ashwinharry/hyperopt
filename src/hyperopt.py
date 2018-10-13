@@ -100,7 +100,7 @@ def numerify(parameters):
 
 
 def main():
-    data = np.stack([np.append(30*(i%2+1)+15*np.random.randn(2),(i%2+1)) for i in range(1,2000)])
+    data = np.stack([np.append(30*(i%2+1)+15*np.random.randn(2),(i%2+1)) for i in range(1,100000)])
     train_x = data[:,0:2]
     train_y = data[:,2]
     model = Model()
@@ -110,8 +110,12 @@ def main():
     with open(hyperparametersfile) as f:
         hyperparameters = json.load(f)
 
-    best_params_grid, best_score_grid, elapsed_grid, best_params_random, best_score_random, elapsed_random = model.run(train_x, train_y, modelclass, hyperparameters)
-    print(json.dumps(jsonify(best_params_grid, best_score_grid, elapsed_grid, best_params_random, best_score_random, elapsed_random)))
+    try:
+        best_params_grid, best_score_grid, elapsed_grid, best_params_random, best_score_random, elapsed_random = model.run(train_x, train_y, modelclass, hyperparameters)
+        print(json.dumps(jsonify(best_params_grid, best_score_grid, elapsed_grid, best_params_random, best_score_random, elapsed_random)))
+    except:
+        print('Oh nooooo')
+    
     sys.stdout.flush()
 
 
