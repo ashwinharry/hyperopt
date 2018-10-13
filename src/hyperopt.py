@@ -100,9 +100,9 @@ def numerify(parameters):
 
 
 def main():
-    data = np.stack([np.append(30*(i%2+1)+15*np.random.randn(2),(i%2+1)) for i in range(1,100000)])
-    train_x = data[:,0:2]
-    train_y = data[:,2]
+    data = np.stack([np.append(30*(i%2+1)+15*np.random.randn(50),(i%2+1)) for i in range(1,10000)])
+    train_x = data[:,0:-1]
+    train_y = data[:,-1]
     model = Model()
 
     modelclass = sys.argv[1]
