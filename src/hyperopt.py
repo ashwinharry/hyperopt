@@ -10,16 +10,18 @@ import json
 def gridsearch(estimator, parameters, train_x, train_y):
     clf = sklearn.model_selection.GridSearchCV(estimator, parameters, n_jobs=-1)
     clf.fit(train_x, train_y)
+    # return clf.cv_results_
     return clf.best_params_, clf.best_score_
 
 # return times also
 def randomsearch(estimator, parameters, train_x, train_y):
     clf = sklearn.model_selection.RandomizedSearchCV(estimator, parameters, n_jobs=-1)
     clf.fit(train_x, train_y)
+    # return clf.cv_results_
     return clf.best_params_, clf.best_score_
 
-def plotsamplesaccuracy():
-    pass
+# def plotsamplesaccuracy():
+#     pass
 
 def decisiontreeclassifier():
     parameters = {
@@ -61,24 +63,49 @@ class Model:
             parameters = self.getdefaultparameters()
         
         parameters = parameters[modelclass]
-        # estimator, parameters = decisiontreeclassifier()
-        bestparams_grid = gridsearch(estimator, parameters, train_x, train_y)
-        bestparams_random = randomsearch(estimator, parameters, train_x, train_y)
-        return bestparams_grid, bestparams_random
+        parameters = numerify(parameters)
+
+        best_params_grid, best_score_grid = gridsearch(estimator, parameters, train_x, train_y)
+        best_params_random, best_score_random = randomsearch(estimator, parameters, train_x, train_y)
+        return best_params_grid, best_score_grid, best_params_random, best_score_random
         # return bestparams_random
 
+def jsonify(best_params_grid, best_score_grid, best_params_random, best_score_random):
+    jsonified = {
+        "grid":{
+            "parameters": best_params_grid,
+            "score": best_score_grid
+        },
+        "random":{
+            "parameters": best_params_random,
+            "score": best_score_random
+        }
+    }
+    return jsonified
+
+def numerify(parameters):
+    for key in parameters:
+        try:
+            parameters[key] = [float(val) for val in parameters[key]]
+        except ValueError:
+            pass
+    return parameters
+
+
 def main():
-    data = np.stack([np.append(30*(i%2+1)+15*np.random.randn(2),(i%2+1)) for i in range(1,200000)])
+    data = np.stack([np.append(30*(i%2+1)+15*np.random.randn(2),(i%2+1)) for i in range(1,2000)])
     train_x = data[:,0:2]
     train_y = data[:,2]
     model = Model()
 
-    print(sys.argv)
     modelclass = sys.argv[1]
     hyperparametersfile = sys.argv[2]
     with open(hyperparametersfile) as f:
         hyperparameters = json.load(f)
 
-    print(model.run(train_x, train_y, modelclass, hyperparameters))
+    best_params_grid, best_score_grid, best_params_random, best_score_random = model.run(train_x, train_y, modelclass, hyperparameters)
+    print(json.dumps(jsonify(best_params_grid, best_score_grid, best_params_random, best_score_random)))
+    sys.stdout.flush()
+
 
 main()
